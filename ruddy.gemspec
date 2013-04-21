@@ -7,9 +7,8 @@ Gem::Specification.new do |gem|
   gem.version       = Ruddy::VERSION
   gem.authors       = ["Andrew Haines"]
   gem.email         = ["andrew@haines.org.nz"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
-  gem.homepage      = ""
+  gem.summary       = %q{Basic Win32 DDE client in Ruby}
+  gem.homepage      = "https://github.com/haines/ruddy"
   gem.license       = "MIT"
 
   gem.files         = `git ls-files`.split($/)

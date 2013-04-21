@@ -1,29 +1,19 @@
 # Ruddy
 
-TODO: Write a gem description
+Basic Win32 DDE client in Ruby.
 
 ## Installation
-
-Add this line to your application's Gemfile:
-
-    gem 'ruddy'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
 
     $ gem install ruddy
 
 ## Usage
 
-TODO: Write usage instructions here
+Connect to a DDE server using the `Ruddy::Connection.open` method, and call `execute` on the yielded connection:
 
-## Contributing
+```ruby
+require "ruddy"
 
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+Ruddy::Connection.open("SERVICE", "topic") do |connection|
+  connection.execute("command")
+end
+```
