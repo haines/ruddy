@@ -1,0 +1,1 @@
+require "ruddy/version"
