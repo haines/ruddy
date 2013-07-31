@@ -1,4 +1,5 @@
 require "ruddy/connection"
+require "ruddy/error"
 require "ffi"
 
 require "support/fake_dde"
@@ -49,14 +50,14 @@ module Ruddy
       context "when initializing the DDE management library fails" do
         it "raises an error" do
           DDE.stub start: 0x4006
-          expect{Connection.new("MY_SERVICE", "my_topic")}.to raise_error SystemCallError, /DDE management library initialization failed/
+          expect{Connection.new("MY_SERVICE", "my_topic")}.to raise_error Error, /DDE management library initialization failed/
         end
 
         it "sets the error code" do
           DDE.stub start: 0x4006
           begin
             Connection.new("MY_SERVICE", "my_topic")
-          rescue SystemCallError => error
+          rescue Error => error
             expect(error.errno).to eq 0x4006
           end
         end
@@ -65,7 +66,19 @@ module Ruddy
       context "when the connection fails" do
         it "raises an error" do
           DDE.stub connect: null_pointer
-          expect{Connection.new("MY_SERVICE", "my_topic")}.to raise_error SystemCallError, /could not connect to DDE service "MY_SERVICE"/
+          expect{Connection.new("MY_SERVICE", "my_topic")}.to raise_error Error, /could not connect to DDE service "MY_SERVICE"/
+        end
+
+        it "sets the error code" do
+          stub_instance 42
+          DDE.stub connect: null_pointer
+          DDE.stub(:last_error).with(42).and_return(0x4009)
+
+          begin
+            Connection.new("MY_SERVICE", "my_topic")
+          rescue Error => error
+            expect(error.errno).to eq 0x4009
+          end
         end
       end
     end
@@ -128,20 +141,21 @@ module Ruddy
         it "raises an error" do
           connection = Connection.new("MY_SERVICE", "my_topic")
           DDE.stub client_transaction: null_pointer
+          DDE.stub last_error: 0x4009
 
-          expect{connection.execute("[Foo(bar)]")}.to raise_error SystemCallError, /command execution failed/
+          expect{connection.execute("[Foo(bar)]")}.to raise_error Error, /command execution failed/
         end
 
         it "sets the error code" do
           stub_instance 42
           connection = Connection.new("MY_SERVICE", "my_topic")
-          DDE.stub(:last_error).with(42).and_return(0x4000)
+          DDE.stub(:last_error).with(42).and_return(0x4009)
           DDE.stub client_transaction: null_pointer
 
           begin
             connection.execute("[Foo(bar)]")
-          rescue SystemCallError => error
-            expect(error.errno).to eq 0x4000
+          rescue Error => error
+            expect(error.errno).to eq 0x4009
           end
         end
       end

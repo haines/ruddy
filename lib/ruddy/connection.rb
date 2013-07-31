@@ -29,7 +29,7 @@ module Ruddy
       result = FFI::MemoryPointer.new(:uint)
 
       data = DDE.client_transaction(buffer, buffer.size, conversation, nil, 0, DDE::XTYP_EXECUTE, timeout, result)
-      raise SystemCallError.new("command execution failed", DDE.last_error(instance)) if data.null?
+      raise Error.new("command execution failed", DDE.last_error(instance)) if data.null?
       DDE.free_data_handle(data)
 
       return result.read_uint
@@ -55,7 +55,7 @@ module Ruddy
     def start
       instance = FFI::MemoryPointer.new(:uint)
       error = DDE.start(instance, CALLBACK, DDE::APPCLASS_STANDARD | DDE::APPCMD_CLIENTONLY, 0)
-      raise SystemCallError.new("DDE management library initialization failed", error) if error != DDE::DMLERR_NO_ERROR
+      raise Error.new("DDE management library initialization failed", error) if error != DDE::DMLERR_NO_ERROR
       @instance = instance.read_uint
     end
 
@@ -68,7 +68,7 @@ module Ruddy
       free_string_handle service_handle
       free_string_handle topic_handle
 
-      raise SystemCallError.new(%{could not connect to DDE service "#{service}"}) if conversation.null?
+      raise Error.new(%{could not connect to DDE service "#{service}"}, DDE.last_error(instance)) if conversation.null?
     end
 
     def create_string_handle(string)
